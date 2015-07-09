@@ -20,7 +20,7 @@ class User < ActiveRecord::Base
 
   has_many(
     :responses,
-    class_name: :AnswerChoice,
+    class_name: :Response,
     foreign_key: :user_id,
     primary_key: :id
   )
@@ -29,16 +29,16 @@ class User < ActiveRecord::Base
     responses_from_user = self
       .responses
       .select("responses.*")
-      .joins("JOIN responses ON #{self.id} = responses.user_id")
-      # .where("#{self.id} = responses.user_id")
-    # polls = self
-    #   .polls p
-    #   .select("p.*")
-    #   .joins("questions q ON q.poll_id = p.id")
-    #   .joins("answer_choices a ON a.question_id = q.id")
-    #   .joins("LEFT JOIN responses_from_user r ON r.answer_id = a.id")
-    #   .having("COUNT(q.id) != COUNT(r.id)")
-    #   .group("p.id")
+      .joins(:responses)
+    polls = self
+      .polls
+      .select("polls.*")
+      .joins("questions q ON q.poll_id = p.id")
+      .joins("answer_choices a ON a.question_id = q.id")
+      .joins("LEFT JOIN responses_from_user r ON r.answer_id = a.id")
+      .joins(:users)
+      .having("COUNT(q.id) != COUNT(r.id)")
+      .group("p.id")
     # Poll.find_by_sql(<<-SQL, id)
     #   SELECT p.*
     #   FROM polls p
