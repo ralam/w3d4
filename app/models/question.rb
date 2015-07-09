@@ -31,4 +31,20 @@ class Question < ActiveRecord::Base
     through: :answer_choices,
     source: :responses
   )
+
+  def results
+
+    answers = self
+      .answer_choices
+      .select("answer_choices.*, COUNT(responses.id) AS count")
+      .joins("LEFT JOIN responses ON answer_choices.id = responses.answer_id")
+      .group("answer_choices.id")
+    answers_and_counts = Hash.new { |h, k| h[k] = 0}
+
+    answers.map do |answer|
+      answers_and_counts[answer.text] = answer.count
+    end
+
+    answers_and_counts
+  end
 end
